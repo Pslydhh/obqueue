@@ -1,5 +1,5 @@
 # obqueue
-obqueue is a awesome fast/simple queue
+obqueue is a awesome fast/simple concurrent queue, and the dequeue is blocking while there is no elements.
 
 # test_obqueue_ 
 
