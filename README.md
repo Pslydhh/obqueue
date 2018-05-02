@@ -7,7 +7,6 @@ obqueue is a awesome fast/simple queue
 <pre><code>
 #include "obqueue.h"
 
-
 #define DUMMY_VALUE	2341321
 
 long COUNTS_PER_THREAD = 2500000;
