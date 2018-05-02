@@ -1,11 +1,11 @@
 # obqueue
 obqueue is a awesome fast/simple queue
 
-# test_obqueue_
+# test_obqueue_ 
 
+# test_obq.c
 <pre><code>
 #include "obqueue.h"
-#include < pthread.h >
 
 
 #define DUMMY_VALUE	2341321
