@@ -10,6 +10,7 @@ obqueue is a awesome fast/simple queue
 #define DUMMY_VALUE	2341321
 
 long COUNTS_PER_THREAD = 2500000;
+int threshold = 8;
 obqueue_t qq;
 void* producer(void* index) {
 	obqueue_t* q = &qq;		
