@@ -21,6 +21,10 @@ It just took less than 1 seconds on my machine.
 long COUNTS_PER_THREAD = 2500000;
 int threshold = 8;
 obqueue_t qq;
+pthread_barrier_t barrier;
+pthread_barrier_t pro_barrier;
+pthread_barrier_t con_barrier;
+
 void* producer(void* index) {
 	obqueue_t* q = &qq;		
 	handle_t* th = (handle_t*) malloc(sizeof(handle_t));
