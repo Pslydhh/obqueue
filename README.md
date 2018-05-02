@@ -3,6 +3,7 @@ obqueue is a awesome fast/simple queue
 
 # test_obqueue_
 
+<pre><code>
 #include "obqueue.h"
 #include <pthread.h>
 
@@ -101,3 +102,4 @@ int main(int argc, char* argv[]) {
 	}
 	return 0;
 }
+</pre></code>
