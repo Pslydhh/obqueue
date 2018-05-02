@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
 	
 	printf("here %ld\n", THREAD_NUM * COUNTS_PER_THREAD);
 	fflush(stdout);
-	init_queue(&qq, THREAD_NUM, THREAD_NUM);
+	init_queue(&qq, THREAD_NUM, THREAD_NUM, threshold);
 	
 	pthread_t pids[THREAD_NUM];
 	
