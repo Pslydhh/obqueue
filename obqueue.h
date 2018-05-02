@@ -51,10 +51,6 @@ static inline node_t* new_node() {
 #define ENQ	2
 #define DEQ	1
 
-pthread_barrier_t barrier;
-pthread_barrier_t pro_barrier;
-pthread_barrier_t con_barrier;
-
 void queue_register(obqueue_t* q, handle_t* th, int flag) {
 	th->next = NULL;
 	th->spare = new_node();
