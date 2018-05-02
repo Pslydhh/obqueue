@@ -5,7 +5,7 @@ obqueue is a awesome fast/simple queue
 
 <pre><code>
 #include "obqueue.h"
-#include <<pthread.h>>
+#include << pthread.h >>
 
 
 #define DUMMY_VALUE	2341321
