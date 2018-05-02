@@ -33,7 +33,7 @@ typedef struct _obqueue_t obqueue_t;
 
 struct _handle_t {
 	struct _handle_t* next DOUBLE_CACHE_ALIGNED;
-  	struct _node_t * spare CACHE_ALIGNED;
+  struct _node_t * spare CACHE_ALIGNED;
 	
 	struct _node_t* volatile put_node;
 	struct _node_t* volatile pop_node;
@@ -66,7 +66,7 @@ void queue_register(obqueue_t* q, handle_t* th, int flag) {
 				break;
 			}
 		}
-    }
+  }
 	
 	pthread_barrier_wait(&q->enq_barrier);
 	
@@ -86,7 +86,7 @@ void queue_register(obqueue_t* q, handle_t* th, int flag) {
 int threshold;
 
 void init_queue(obqueue_t* q, int enqs, int deqs) {
-    q->init_node = new_node();
+  q->init_node = new_node();
 	q->put_index = q->pop_index = q->init_flag = 0;
 
 	pthread_barrier_init(&q->enq_barrier, NULL, enqs);
