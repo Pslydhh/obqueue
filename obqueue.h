@@ -25,6 +25,8 @@ struct _obqueue_t {
 
 	struct _handle_t* volatile enq_handles[HANDLES];
 	struct _handle_t* volatile deq_handles[HANDLES];
+	
+	int threshold;
 
 	pthread_barrier_t enq_barrier;
 	pthread_barrier_t deq_barrier;
@@ -83,10 +85,9 @@ void queue_register(obqueue_t* q, handle_t* th, int flag) {
 	pthread_barrier_wait(&q->deq_barrier);
 }
 
-int threshold;
-
-void init_queue(obqueue_t* q, int enqs, int deqs) {
-  q->init_node = new_node();
+void init_queue(obqueue_t* q, int enqs, int deqs, int threshold) {
+	q->init_node = new_node();
+	q->threshold = threshold;
 	q->put_index = q->pop_index = q->init_flag = 0;
 
 	pthread_barrier_init(&q->enq_barrier, NULL, enqs);
@@ -166,7 +167,7 @@ void *dequeue(obqueue_t *q, handle_t *th) {
 	if((index & NBITS) == NBITS) {
 		FENCE();
 		long init_index = q->init_flag;
-		if(th->pop_node->id - init_index >= threshold 
+		if(th->pop_node->id - init_index >= q->threshold 
 			&& init_index >= 0
 			&& CASa(&q->init_flag, &init_index, -1)) {
 			
@@ -211,5 +212,3 @@ void *dequeue(obqueue_t *q, handle_t *th) {
 	}
 	return cv;
 }
-
-
