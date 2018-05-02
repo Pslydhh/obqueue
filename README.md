@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
 		struct timeval pro_end;
 		gettimeofday(&pro_end, NULL);
 		float cost_time = (pro_end.tv_sec-start.tv_sec)+(pro_end.tv_usec-start.tv_usec) / 1000000.0;
-		printf("pro cost times: %f\n", cost_time);
+		printf("pro cost times: %f seconds\n", cost_time);
 		printf("%d times over\n", i);
 		fflush(stdout);
 		++i;
