@@ -8,7 +8,7 @@ obqueue is a awesome fast/simple queue
 #include <pthread.h>
 
 
-#define DUMMY_VALUE         2341321
+#define DUMMY_VALUE	2341321
 
 long COUNTS_PER_THREAD = 2500000;
 obqueue_t qq;
@@ -30,6 +30,7 @@ void* producer(void* index) {
 #define THREAD_NUM 2
 int* ints;
 void* consumer(void* index) {
+
 	obqueue_t* q = &qq;
 	handle_t* th = (handle_t*) malloc(sizeof(handle_t));
 	memset(th, 0, sizeof(handle_t));
@@ -52,6 +53,7 @@ void* consumer(void* index) {
 }
 
 int main(int argc, char* argv[]) {
+
 	printf("thread number: %d\n", THREAD_NUM);
 	
 	pthread_barrier_init(&pro_barrier, NULL, THREAD_NUM + 1);
@@ -78,7 +80,9 @@ int main(int argc, char* argv[]) {
 			exit(1);
 		}
 	}
-	for(int i = 0;;) {
+	
+	for(int i = 0; i < 8;) {
+	
 		printf("\n%d times\n", i);
 		
 		pthread_barrier_wait(&con_barrier);	
