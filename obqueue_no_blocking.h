@@ -62,9 +62,8 @@ void queue_register(obqueue_t* q, handle_t* th, int flag) {
 				break;
 			}
 		}
+			pthread_barrier_wait(&q->enq_barrier);
   }
-	
-	pthread_barrier_wait(&q->enq_barrier);
 	
 	if(flag & DEQ) {
 		handle_t** tail = q->deq_handles;
@@ -74,9 +73,8 @@ void queue_register(obqueue_t* q, handle_t* th, int flag) {
 				break;
 			}	
 		}	
+		pthread_barrier_wait(&q->deq_barrier);
 	}
-
-	pthread_barrier_wait(&q->deq_barrier);
 }
 
 void init_queue(obqueue_t* q, int enqs, int deqs, int threshold) {
