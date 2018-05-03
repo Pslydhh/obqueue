@@ -2,7 +2,7 @@
 obqueue is a awesome fast/simple concurrent queue, and the dequeue is blocking while there is no elements.
 
 # Prohibition
-0 and (-1) unable to enter the queue.
+0 unable to enter the queue.
 
 # test_obqueue_ 
 gcc -pthread -o test_obq test_obq.c
