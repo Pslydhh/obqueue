@@ -183,12 +183,14 @@ int main(int argc, char* argv[]) {
 		sleep(1);	
 		struct timeval start;
 		gettimeofday(&start, NULL);
-		pthread_barrier_wait(&pro_barrier);
 		
 		pthread_barrier_wait(&pro_barrier);
+		pthread_barrier_wait(&pro_barrier);
+		
 		struct timeval pro_end;
 		gettimeofday(&pro_end, NULL);
 		float cost_time = (pro_end.tv_sec-start.tv_sec)+(pro_end.tv_usec-start.tv_usec) / 1000000.0;
+		
 		printf("pro cost times: %f seconds\n", cost_time);
 		printf("%d times over\n", i);
 		fflush(stdout);
