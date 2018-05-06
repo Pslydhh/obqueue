@@ -5,8 +5,11 @@ obqueue_no_blocking.h is non-blocking relative to obqueue.h, dequeue just return
 # Prohibition
 0(NULL) unable to enter the queue.
 # Notes
-1: The long type is -2^63 ~ (2^63-1), Even call 100 million times per second(so Absolutely not so much in the actual environment), We can continue to use it for  (2^63-1) / 100,000,000 / 3600(seconds) / 24(hours) / 365(days) == 2924.71209 (years)！
-2: if there is one thread(It is likely to be dequeuer) Particularly slow, May slow down memory reclaim, so every consumer should be consumed on average.
+1: 
+The long type is -2^63 ~ (2^63-1), Even call 100 million times per second(so Absolutely not so much in the actual environment), We can continue to use it for  (2^63-1) / 100,000,000 / 3600(seconds) / 24(hours) / 365(days) == 2924.71209 (years)！
+
+2: 
+if there is one thread(It is likely to be dequeuer) Particularly slow, May slow down memory reclaim, so every consumer should be consumed on average.
 # test_obqueue_ 
 gcc -pthread -g -o test_obq test_obq.c
 
