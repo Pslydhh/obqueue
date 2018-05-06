@@ -13,7 +13,7 @@ if there is one thread(It is likely to be dequeuer) Particularly slow, May slow 
 # test_obqueue_ 
 gcc -pthread -g -o test_obq test_obq.c
 
-./test_obq 10000000 8
+./test_obq 2500000 8
 
 # use case(obqueue.h)：test_obq.c
 <pre><code>
