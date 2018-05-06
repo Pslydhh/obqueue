@@ -24,7 +24,7 @@ void* producer(void* index) {
 	return NULL;
 }
 
-#define THREAD_NUM 10
+#define THREAD_NUM 4
 int* array;
 void* consumer(void* index) {
 
