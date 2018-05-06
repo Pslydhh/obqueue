@@ -4,7 +4,7 @@
 #define N	NODE_SIZE
 #define NBITS	(N - 1)
 #define BOT ((void *)0)
-#define TOP ((void *)-1)
+
 #include <linux/futex.h>
 #include <syscall.h>
 
