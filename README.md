@@ -1,5 +1,6 @@
 # obqueue
-obqueue is a awesome fast/simple concurrent queue, and the dequeue is blocking while there is no elements.
+obqueue.h is a awesome fast/simple concurrent queue, and the dequeue is blocking while there is no elements.
+obqueue_no_blocking.h is non-blocking relative to obqueue.h, dequeue just return NULL while there is no elements.
 
 # Prohibition
 0 unable to enter the queue.
