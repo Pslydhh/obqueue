@@ -162,8 +162,8 @@ int main(int argc, char* argv[]) {
 	fflush(stdout);
 	ob_init_queue(&qq, THREAD_NUM, THREAD_NUM, threshold);
 
-    struct timeval start;
-    gettimeofday(&start, NULL);
+	struct timeval start;
+	gettimeofday(&start, NULL);
 	
 	pthread_t pids[THREAD_NUM];
 	for(int i = 0; i < THREAD_NUM; ++i) {
