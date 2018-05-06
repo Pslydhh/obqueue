@@ -28,7 +28,7 @@ void* produce_and_consume(void* index) {
 	return NULL;
 }
 
-#define THREAD_NUM 126
+#define THREAD_NUM 10
 
 int main(int argc, char* argv[]) {
 
