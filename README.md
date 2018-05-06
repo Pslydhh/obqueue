@@ -9,9 +9,6 @@ gcc -pthread -g -o test_obq test_obq.c
 
 ./test_obq 10000000 8
 
-8 loops, give 2 threads for produce, 2 threads for consumes, and every thread take 10,000,000 ops, 8 is a threshold for memory reclaims.
-It just took less than 1 seconds on my machine.
-
 # use case(obqueue.h)：test_obq.c
 <pre><code>
 #include "obqueue.h"
