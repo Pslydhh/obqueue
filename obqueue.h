@@ -5,6 +5,7 @@
 #define NBITS	(N - 1)
 #define BOT ((void *)0)
 
+#include <pthread.h>
 #include <linux/futex.h>
 #include <syscall.h>
 
