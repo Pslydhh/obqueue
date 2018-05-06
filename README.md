@@ -3,7 +3,7 @@ obqueue.h is a awesome fast/simple concurrent queue, and the dequeue is blocking
 obqueue_no_blocking.h is non-blocking relative to obqueue.h, dequeue just return NULL while there is no elements.
 
 # Prohibition
-0 unable to enter the queue.
+0(NULL) unable to enter the queue.
 
 # test_obqueue_ 
 gcc -pthread -g -o test_obq test_obq.c
