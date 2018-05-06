@@ -6,6 +6,7 @@
 #define BOT ((void *)0)
 #define TOP ((void *)-1)
 
+#include <pthread.h>
 struct _node_t {
 	struct _node_t* volatile next DOUBLE_CACHE_ALIGNED;
 	long id DOUBLE_CACHE_ALIGNED;
