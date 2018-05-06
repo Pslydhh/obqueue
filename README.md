@@ -5,7 +5,7 @@ obqueue is a awesome fast/simple concurrent queue, and the dequeue is blocking w
 0 unable to enter the queue.
 
 # test_obqueue_ 
-gcc -pthread --o test_obq test_obq.c
+gcc -pthread -g -o test_obq test_obq.c
 
 ./test_obq 10000000 8
 
