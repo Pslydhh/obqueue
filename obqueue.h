@@ -214,11 +214,12 @@ void *ob_dequeue(obqueue_t *q, handle_t *th) {
                 next = q->enq_handles[++i];
             }
 
-			if(min_node->id <= init_index)
-				q->init_id = init_index;
+			long new_id = min_node->id;
+			if(new_id <= init_index)
+				RELEASE(&q->init_id, init_index);
 			else {
 				q->init_node = min_node;
-				q->init_id = min_node->id;
+				RELEASE(&q->init_id, new_id);
 
 				do {
 					node_t* tmp = init_node->next;
