@@ -43,7 +43,7 @@ struct _handle_t {
 };
 typedef struct _handle_t handle_t;
 
-static inline node_t* new_node() {
+static inline node_t* ob_new_node() {
     node_t* n = align_malloc(PAGE_SIZE, sizeof(node_t));
     memset(n, 0, sizeof(node_t));
     return n;
@@ -53,9 +53,9 @@ static inline node_t* new_node() {
 #define DEQ	(1 << 0)
 
 // regiseter the enqueuers first, dequeuers second.
-void queue_register(obqueue_t* q, handle_t* th, int flag) {
+void ob_queue_register(obqueue_t* q, handle_t* th, int flag) {
 	th->next = NULL;
-	th->spare = new_node();
+	th->spare = ob_new_node();
 	th->put_node = th->pop_node = q->init_node;
 	
     if(flag & ENQ) {
@@ -83,8 +83,8 @@ void queue_register(obqueue_t* q, handle_t* th, int flag) {
 	}
 }
 
-void init_queue(obqueue_t* q, int enqs, int deqs, int threshold) {
-	q->init_node = new_node();
+void ob_init_queue(obqueue_t* q, int enqs, int deqs, int threshold) {
+	q->init_node = ob_new_node();
 	q->threshold = threshold;
 	q->put_index = q->pop_index = q->init_id = 0;
 
@@ -94,9 +94,9 @@ void init_queue(obqueue_t* q, int enqs, int deqs, int threshold) {
 }
 
 /*
- * find_cell: This is our core operation, locating the offset on the nodes and nodes needed.
+ * ob_find_cell: This is our core operation, locating the offset on the nodes and nodes needed.
  */
-static void *find_cell(node_t* volatile* ptr, long i, handle_t* th) {
+static void *ob_find_cell(node_t* volatile* ptr, long i, handle_t* th) {
 	// get current node
     node_t *curr = *ptr;
 	/*j is thread's local node'id(put node or pop node), (i / N) is the cell needed node'id.
@@ -108,7 +108,7 @@ static void *find_cell(node_t* volatile* ptr, long i, handle_t* th) {
 			// use thread's standby node.
             node_t *temp = th->spare;
             if (!temp) {
-                temp = new_node();
+                temp = ob_new_node();
                 th->spare = temp;
             }
 			// next node's id is j + 1.
@@ -131,13 +131,13 @@ static void *find_cell(node_t* volatile* ptr, long i, handle_t* th) {
     return &curr->cells[i % N];
 }
 
-int futex_wake(void* addr, int val){  
+int ob_futex_wake(void* addr, int val){  
   return syscall(SYS_futex, addr, FUTEX_WAKE, val, NULL, NULL, 0);  
 }  
 
-void enqueue(obqueue_t *q, handle_t *th, void *v) {
+void ob_enqueue(obqueue_t *q, handle_t *th, void *v) {
 	// FAAcs(&q->put_index, 1) return the needed index.
-	void* volatile* c = find_cell(&th->put_node, FAAcs(&q->put_index, 1), th);
+	void* volatile* c = ob_find_cell(&th->put_node, FAAcs(&q->put_index, 1), th);
 	// now c is the nedded cell
 	void* cv;
 	/* if XCHG(ATOMIC: XCHG—Exchange Register/Memory with Register) 
@@ -146,21 +146,21 @@ void enqueue(obqueue_t *q, handle_t *th, void *v) {
 		return;
 	/* else the couterpart pop thread has wait this cell, so we just change the wati'value to 0 and wake it*/
 	*((int*) cv) = 0;
-	futex_wake(cv, 1);	
+	ob_futex_wake(cv, 1);	
 }
 
-int futex_wait(void* addr, int val){  
+int ob_futex_wait(void* addr, int val){  
     return syscall(SYS_futex, addr, FUTEX_WAIT, val, NULL, NULL, 0);  
 }  
 
-void *dequeue(obqueue_t *q, handle_t *th) {
+void *ob_dequeue(obqueue_t *q, handle_t *th) {
 	int times;
 	void* cv;
 	int futex_addr = 1;
 	// index is the needed pop_index.
 	long index = FAAcs(&q->pop_index, 1);
 	// locate the needed cell.
-	void* volatile* c = find_cell(&th->pop_node, index, th);
+	void* volatile* c = ob_find_cell(&th->pop_node, index, th);
     // because the queue is a blocking queue, so we just use more spin.
 	times = (1 << 20);
 	do {
@@ -172,7 +172,7 @@ void *dequeue(obqueue_t *q, handle_t *th) {
     // XCHG, if return BOT so this cell is NULL, we just wait and observe the futex_addr'value to 0.
 	if((cv = XCHG(c, &futex_addr)) == BOT) {
 		while(futex_addr == 1)
-			futex_wait(&futex_addr, 1);
+			ob_futex_wait(&futex_addr, 1);
 		// the couterpart put thread has change futex_addr's value to 0. and the data has into cell(c).
 		cv = *c;
 	}
