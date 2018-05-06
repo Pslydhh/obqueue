@@ -19,7 +19,7 @@ gcc -pthread -g -o test_obq test_obq.c
 <pre><code>
 #include "obqueue.h"
 
-#define THREAD_NUM 10
+#define THREAD_NUM 4
 long COUNTS_PER_THREAD = 2500000;
 int threshold = 8;
 obqueue_t qq;
@@ -145,7 +145,7 @@ void* produce_and_consume(void* index) {
 	return NULL;
 }
 
-#define THREAD_NUM 10
+#define THREAD_NUM 4
 
 int main(int argc, char* argv[]) {
 
