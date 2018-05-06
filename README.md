@@ -194,12 +194,10 @@ int main(int argc, char* argv[]) {
 	}
 	if(verify)
 		printf("ints[1-%ld] has been Verify through\n", THREAD_NUM * COUNTS_PER_THREAD);
+		
 	float cost_time = (pro_end.tv_sec-start.tv_sec)+(pro_end.tv_usec-start.tv_usec) / 1000000.0;
-	
 	printf("pro&con cost times: %f seconds\n", cost_time);
 	fflush(stdout);
-	memset(array, 0, (1 + THREAD_NUM * COUNTS_PER_THREAD) * sizeof(int));
-
 	return 0;
 }
 </pre></code>
