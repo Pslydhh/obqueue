@@ -15,10 +15,11 @@ struct _node_t {
 };
 typedef struct _node_t node_t;
 
+// Support 127 threads.
 #define HANDLES	128
 struct _obqueue_t {
 	struct _node_t* init_node;
-	volatile long init_flag DOUBLE_CACHE_ALIGNED;
+	volatile long init_id DOUBLE_CACHE_ALIGNED;
 	
 	volatile long put_index DOUBLE_CACHE_ALIGNED;
 	volatile long pop_index DOUBLE_CACHE_ALIGNED;
@@ -48,9 +49,10 @@ static inline node_t* new_node() {
     return n;
 }
 
-#define ENQ	2
-#define DEQ	1
+#define ENQ	(1 << 1)
+#define DEQ	(1 << 0)
 
+// regiseter the enqueuers first, dequeuers second.
 void queue_register(obqueue_t* q, handle_t* th, int flag) {
 	th->next = NULL;
 	th->spare = new_node();
@@ -64,8 +66,9 @@ void queue_register(obqueue_t* q, handle_t* th, int flag) {
 				break;
 			}
 		}
+		// wait for the other enqueuers to register.
 		pthread_barrier_wait(&q->enq_barrier);
-  }
+  	}
 	
 	if(flag & DEQ) {
 		handle_t** tail = q->deq_handles;
@@ -75,6 +78,7 @@ void queue_register(obqueue_t* q, handle_t* th, int flag) {
 				break;
 			}	
 		}
+		// wait for the other dequeuers to register.
 		pthread_barrier_wait(&q->deq_barrier);
 	}
 }
@@ -82,39 +86,48 @@ void queue_register(obqueue_t* q, handle_t* th, int flag) {
 void init_queue(obqueue_t* q, int enqs, int deqs, int threshold) {
 	q->init_node = new_node();
 	q->threshold = threshold;
-	q->put_index = q->pop_index = q->init_flag = 0;
+	q->put_index = q->pop_index = q->init_id = 0;
 
+	// We take enqs enqueuers, deqs dequeuers. 
 	pthread_barrier_init(&q->enq_barrier, NULL, enqs);
 	pthread_barrier_init(&q->deq_barrier, NULL, deqs);
 }
 
+/*
+ * find_cell: This is our core operation, locating the offset on the nodes and nodes needed.
+ */
 static void *find_cell(node_t* volatile* ptr, long i, handle_t* th) {
+	// get current node
     node_t *curr = *ptr;
-
-    long j;
-    for (j = curr->id; j < i / N; ++j) {
+	/*j is thread's local node'id(put node or pop node), (i / N) is the cell needed node'id.
+	  and we shoud take it, By filling the nodes between the j and (i / N) through 'next' field*/ 
+    for (long j = curr->id; j < i / N; ++j) {
         node_t *next = curr->next;
-
+		// next is NULL, so we Start filling.
         if (next == NULL) {
+			// use thread's standby node.
             node_t *temp = th->spare;
-
             if (!temp) {
                 temp = new_node();
                 th->spare = temp;
             }
-
+			// next node's id is j + 1.
             temp->id = j + 1;
-
+			// if true, then use this thread's node, else then thread has have done this.
             if (CASra(&curr->next, &next, temp)) {
                 next = temp;
+				// now thread there is no standby node.
                 th->spare = NULL;
             }
         }
-
+		// take the next node.
         curr = next;
     }
-
+	// update our node to the present node.
     *ptr = curr;
+	// Orders processor execution, so other thread can see the '*ptr = curr'.
+	asm ("sfence" ::: "cc", "memory");
+	// now we get the needed cell, its' node is curr and index is i % N.
     return &curr->cells[i % N];
 }
 
@@ -123,10 +136,15 @@ int futex_wake(void* addr, int val){
 }  
 
 void enqueue(obqueue_t *q, handle_t *th, void *v) {
+	// FAAcs(&q->put_index, 1) return the needed index.
 	void* volatile* c = find_cell(&th->put_node, FAAcs(&q->put_index, 1), th);
-	void* cv;	
+	// now c is the nedded cell
+	void* cv;
+	/* if XCHG(ATOMIC: XCHG—Exchange Register/Memory with Register) 
+		return BOT, so our value has put into the cell, just return.*/
 	if((cv = XCHG(c, v)) == BOT)
 		return;
+	/* else the couterpart pop thread has wait this cell, so we just change the wati'value to 0 and wake it*/
 	*((int*) cv) = 0;
 	futex_wake(cv, 1);	
 }
@@ -136,14 +154,14 @@ int futex_wait(void* addr, int val){
 }  
 
 void *dequeue(obqueue_t *q, handle_t *th) {
-	handle_t* init_th = th;
 	int times;
 	void* cv;
-	int futex_addr = 1;	
+	int futex_addr = 1;
+	// index is the needed pop_index.
 	long index = FAAcs(&q->pop_index, 1);
+	// locate the needed cell.
 	void* volatile* c = find_cell(&th->pop_node, index, th);
-		
-		
+    // because the queue is a blocking queue, so we just use more spin.
 	times = (1 << 20);
 	do {
 		cv = *c;
@@ -151,19 +169,24 @@ void *dequeue(obqueue_t *q, handle_t *th) {
 			goto over;
 		__asm__ ("pause");
 	} while(times-- > 0);
-
+    // XCHG, if return BOT so this cell is NULL, we just wait and observe the futex_addr'value to 0.
 	if((cv = XCHG(c, &futex_addr)) == BOT) {
 		while(futex_addr == 1)
 			futex_wait(&futex_addr, 1);
+		// the couterpart put thread has change futex_addr's value to 0. and the data has into cell(c).
 		cv = *c;
 	}
 	over:
+	/* if the index is the node's last cell: (NBITS == 4095), it Try to reclaim the memory.
+	 * so we just take the smallest ID node that is not reclaimed(init_node), and At the same time, by traversing     
+	 * the local data of other threads, we get a larger ID node(min_node). 
+	 * So it is safe to recycle the memory [init_node, min_node).
+	 */
 	if((index & NBITS) == NBITS) {
-		FENCE();
-		long init_index = q->init_flag;
+		long init_index = q->init_id;
 		if(th->pop_node->id - init_index >= q->threshold 
 			&& init_index >= 0
-			&& CASa(&q->init_flag, &init_index, -1)) {
+			&& CASa(&q->init_id, &init_index, -1)) {
 			
 			node_t* init_node = q->init_node;
             th = q->deq_handles[0]; 
@@ -191,10 +214,10 @@ void *dequeue(obqueue_t *q, handle_t *th) {
             }
 
 			if(min_node->id <= init_index)
-				q->init_flag = init_index;
+				q->init_id = init_index;
 			else {
 				q->init_node = min_node;
-				q->init_flag = min_node->id;
+				q->init_id = min_node->id;
 
 				do {
 					node_t* tmp = init_node->next;
