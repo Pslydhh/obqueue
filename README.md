@@ -71,8 +71,8 @@ int main(int argc, char* argv[]) {
 	memset(array, 0, (1 + THREAD_NUM * COUNTS_PER_THREAD) * sizeof(int));
 	ob_init_queue(&qq, THREAD_NUM, THREAD_NUM, threshold);
 
-    struct timeval start;
-    gettimeofday(&start, NULL);
+	struct timeval start;
+	gettimeofday(&start, NULL);
 	
 	pthread_t pids[THREAD_NUM];
 	
