@@ -184,7 +184,7 @@ void *ob_dequeue(obqueue_t *q, handle_t *th) {
 	 * So it is safe to recycle the memory [init_node, min_node).
 	 */
 	if((index & NBITS) == NBITS) {
-		long init_index = q->init_id;
+		long init_index = ACQUIRE(&q->init_id);
 		if((th->pop_node->id - init_index) >= q->threshold 
 			&& init_index >= 0
 			&& CASa(&q->init_id, &init_index, -1)) {
