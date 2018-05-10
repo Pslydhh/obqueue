@@ -165,8 +165,8 @@ void *ob_dequeue(obqueue_t *q, handle_t *th) {
 		// XCHG, if return BOT so this cell is NULL, we wastage this cell~~
         if((cv = XCHG(c, TOP)) == BOT) {
 			// if our index is greater than put_index, we just return NULL, because we've seen empty queues
-            if(index >= q->put_index) {
-                long put_index = q->put_index;
+			long put_index;
+            if(index >= (put_index = q->put_index)) {
                 while(put_index <= index && !CAS(&q->put_index, &put_index, index + 1));
                 break;
             }
