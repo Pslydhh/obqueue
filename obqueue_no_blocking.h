@@ -167,7 +167,7 @@ void *ob_dequeue(obqueue_t *q, handle_t *th) {
 			// if our index is greater than put_index, we just return NULL, because we've seen empty queues
 			long put_index;
             if(index >= (put_index = q->put_index)) {
-                while(put_index <= index && !CAS(&q->put_index, &put_index, index + 1));
+                while(!CAS(&q->put_index, &put_index, index + 1) && put_index <= index);
                 break;
             }
 			// else there is more datas, so we try again.
