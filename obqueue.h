@@ -37,10 +37,10 @@ typedef struct _obqueue_t obqueue_t;
 
 struct _handle_t {
 	struct _handle_t* next DOUBLE_CACHE_ALIGNED;
-  struct _node_t * spare CACHE_ALIGNED;
+  struct _node_t * spare;
 	
-	struct _node_t* volatile put_node;
-	struct _node_t* volatile pop_node;
+	struct _node_t* volatile put_node CACHE_ALIGNED;
+	struct _node_t* volatile pop_node CACHE_ALIGNED;
 };
 typedef struct _handle_t handle_t;
 
