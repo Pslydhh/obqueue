@@ -140,6 +140,7 @@ _compare_and_swap(void ** ptr, void ** expected, void * desired) {
 #define RELEASE(p, v) do {\
   __asm__("":::"memory"); \
   *p = v; \
+  asm ("sfence" ::: "memory");\
 } while (0)
 #define FENCE() __sync_synchronize()
 
