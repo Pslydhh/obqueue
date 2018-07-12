@@ -36,7 +36,6 @@ struct _obqueue_t {
 typedef struct _obqueue_t obqueue_t;
 
 struct _handle_t {
-	struct _handle_t* next DOUBLE_CACHE_ALIGNED;
   struct _node_t * spare;
 	
 	struct _node_t* volatile put_node CACHE_ALIGNED;
@@ -55,7 +54,6 @@ static inline node_t* ob_new_node() {
 
 // regiseter the enqueuers first, dequeuers second.
 void ob_queue_register(obqueue_t* q, handle_t* th, int flag) {
-	th->next = NULL;
 	th->spare = ob_new_node();
 	th->put_node = th->pop_node = q->init_node;
 	
