@@ -1,3 +1,5 @@
+// This codes is originally from the https://github.com/chaoran/fast-wait-free-queue
+
 /** @file */
 
 #ifndef PRIMITIVES_H
@@ -35,6 +37,8 @@
  */
 #define CASa(ptr, cmp, val) __atomic_compare_exchange_n(ptr, cmp, val, 0, \
     __ATOMIC_ACQUIRE, __ATOMIC_RELAXED)
+
+#define XCHG(mem, newvalue) __atomic_exchange_n(mem, newvalue, __ATOMIC_ACQ_REL)
 
 /**
  * An atomic swap.
