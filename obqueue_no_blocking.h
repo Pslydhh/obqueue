@@ -57,7 +57,8 @@ void ob_queue_register(obqueue_t* q, handle_t* th, int flag) {
     
     if(flag & ENQ) {
         handle_t** tail = q->enq_handles;
-        for(int i = 0; ; ++i) {
+        int i = 0;
+        for(; ; ++i) {
             handle_t* init = NULL;
             if(tail[i] == NULL && CAS(tail + i, &init, th)) {
                 break;
@@ -69,7 +70,8 @@ void ob_queue_register(obqueue_t* q, handle_t* th, int flag) {
     
     if(flag & DEQ) {
         handle_t** tail = q->deq_handles;
-        for(int i = 0; ; ++i) {
+        int i = 0;
+        for(; ; ++i) {
             handle_t* init = NULL;    
             if(tail[i] == NULL && CAS(tail + i, &init, th)) {
                 break;
@@ -98,7 +100,8 @@ static void *ob_find_cell(node_t* volatile* ptr, long i, handle_t* th) {
     node_t *curr = *ptr;
     /*j is thread's local node'id(put node or pop node), (i / N) is the cell needed node'id.
       and we shoud take it, By filling the nodes between the j and (i / N) through 'next' field*/ 
-    for (long j = curr->id; j < i / N; ++j) {
+    long j = curr->id;
+    for (; j < i / N; ++j) {
         node_t *next = curr->next;
         // next is NULL, so we Start filling.
         if (next == NULL) {
