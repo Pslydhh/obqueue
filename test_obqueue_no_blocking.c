@@ -16,7 +16,8 @@ void* produce_and_consume(void* index) {
     
     for(;; ) {
         pthread_barrier_wait(&pro_barrier);
-        for(int i = 0; i < COUNTS_PER_THREAD; ++i) {
+        int i = 0;
+        for(; i < COUNTS_PER_THREAD; ++i) {
             ob_enqueue(q, th, 1 + i + ((int) index) * COUNTS_PER_THREAD);
             int value;
             if((value = ob_dequeue(q, th)) == NULL)
@@ -48,15 +49,15 @@ int main(int argc, char* argv[]) {
     ob_init_queue(&qq, THREAD_NUM, THREAD_NUM, threshold);
     
     pthread_t pids[THREAD_NUM];
-    
-    for(int i = 0; i < THREAD_NUM; ++i) {
+    int i = 0; 
+    for(; i < THREAD_NUM; ++i) {
         if(-1 == pthread_create(&pids[i], NULL, produce_and_consume, i)) {
             printf("error create thread\n");
             exit(1);
         }
     }
-    
-    for(int i = 0; i < 8;) {
+    i = 0; 
+    for(; i < 8;) {
     
         printf("\n%d times\n", i);
         sleep(1);    
@@ -70,7 +71,8 @@ int main(int argc, char* argv[]) {
         gettimeofday(&pro_end, NULL);
 
         int verify = 1;
-        for(int j = 1; j <= THREAD_NUM * COUNTS_PER_THREAD; ++j) {
+        int j = 1;
+        for(; j <= THREAD_NUM * COUNTS_PER_THREAD; ++j) {
             if(array[j] != 1) {
                 printf("Error: ints[%d]\n", j);
                 verify = 0;
