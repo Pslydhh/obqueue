@@ -173,8 +173,10 @@ void *ob_dequeue(obqueue_t *q, handle_t *th) {
     } while(times-- > 0);
     // XCHG, if return BOT so this cell is NULL, we just wait and observe the futex_addr'value to 0.
     if((cv = XCHG(c, &futex_addr)) == BOT) {
-        while(futex_addr == 1)
+			  // call wait before compare futex_addr to prevent use-after-free of futex_addr at ob_enqueue(call wake);
+				do {
             ob_futex_wait(&futex_addr, 1);
+				} while(futex_addr == 1);
         // the couterpart put thread has change futex_addr's value to 0. and the data has into cell(c).
         cv = *c;
     }
